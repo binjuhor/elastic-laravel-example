@@ -1,0 +1,164 @@
+@extends('layouts.app')
+
+@section ('extracss')
+<link href="/css/chartist-plugin-tooltip.css" rel="stylesheet" />
+@endsection
+
+@section('content')
+ <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="header">
+                    <div class="col-md-2">
+                        Line chart
+                        <p class="category">Multiple chart</p>
+                    </div>
+                    <div class="col-md-10">
+                        <form id="getdata" action="#" method="POST">
+                            {{ csrf_field() }}
+                            <div class="col-sm-2">
+                                <select name="view_by" id="type-cselect" class="selectpicker" data-title="View" data-style="btn-default btn-block" data-menu-style="dropdown-blue">
+                                    <option value="month-select">View</option>
+                                    <option @if(isset($dataBoard[0]['set_view']) && $dataBoard[0]['set_view']=='month-select') selected @endif value="month-select">Month</option>
+                                    <option @if(isset($dataBoard[0]['set_view']) && $dataBoard[0]['set_view']=='week-select') selected @endif value="week-select">Week</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2 selectdate month-select" data-url="/boards/getmonth">
+                                <select name="view_month" id="month-select" class="selectpicker" data-title="On" data-style="btn-default btn-block" data-menu-style="dropdown-blue">
+                                    <option value="current" @if(isset($dataBoard[0]['set_time']) && $dataBoard[0]['set_time']=='current') selected @endif>30 days latest</option>
+                                    @foreach($months as $key => $month)
+                                        <option value="{{$key}}">{{$month}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-sm-2 selectdate week-select hide" data-url="/boards/getweek">
+                                <select name="view_week" id="week-select" class="selectpicker" data-title="On" data-style="btn-default btn-block" data-menu-style="dropdown-blue">
+                                    @for($i=1; $i<=52; $i++)
+                                        <option value="{{$i}}"> Week {{$i}}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div class="col-sm-2 chart-view" data-url="line-view">
+                                <select name="sale_view" id="chart-view" class="selectpicker" data-title="Default" data-style="btn-default btn-block" data-menu-style="dropdown-blue">
+                                    <option value="default" @if(isset($dataBoard[0]['set_sale']) && $dataBoard[0]['set_sale']=='default') selected @endif> Total sales </option>
+                                    <option @if(isset($dataBoard[0]['set_sale']) && $dataBoard[0]['set_sale']=='salesdate') selected @endif value="salesdate">Sales date</option>
+                                </select>
+                            </div>
+                             <div class="col-sm-2 data-view" data-url="line-view">
+                                <select name="data_view" id="data-view" class="selectpicker" data-title="Day view view" data-style="btn-default btn-block" data-menu-style="dropdown-blue">
+                                    <option value="day" @if(isset($dataBoard[0]['data_view']) && $dataBoard[0]['data_view']=='day') selected @endif>Days view</option>
+                                    <option value="/boards/weekdata" @if(isset($dataBoard[0]['data_view']) && $dataBoard[0]['data_view']=='/boards/weekdata') selected @endif>Weeks sales</option>
+                                    <option value="/boards/monthdata" @if(isset($dataBoard[0]['data_view']) && $dataBoard[0]['data_view']=='/boards/monthdata') selected @endif>Months sales</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 data-view" data-url="line-view">
+                                <button type="button" id="save-stage" class=" hide btn btn-default" >Save View</button>
+                            </div>
+
+                            <input type="hidden" id="itemsList" name="items" value="@if(isset($dataBoard[0]['item_id'])){{$dataBoard[0]['item_id']}}@endif">
+                            <input type="hidden" id="url-getdata" name="url" value="/boards/ajaxitem">
+                            <input type="hidden" id="dataChart" name="data" value="@if(isset($dataBoard[0]['item_id'])){{$dataBoard[0]['data']}}@endif">
+                            <input type="hidden" id="id_board" name="id_board" value="{{$id}}">
+                            <input type="hidden" id="totalday" name="totalday" value="0">
+                        </form>
+                    </div>
+                </div>
+                <div class="content">
+                    <div id="chartSale" class="ct-chart "></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!--End .row-->
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="content">
+                    <h1>{{count($items)}}<sup>items</sup></h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="content">
+                    <h1><span id="sales">0</span><sup>Today sales</sup></h1>
+                </div>
+            </div>
+        </div>
+
+    </div><!--End .row info-->
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="toolbar">
+
+                </div>
+
+                <table id="bootstrap-table" class="table">
+                    <thead>
+                        <th data-field="state" data-checkbox="true"></th>
+                        <th data-field="id" class="text-center">Thumbs</th>
+                        <th data-field="name" data-sortable="true">Name</th>
+                        <th data-field="saledate" data-sortable="true">Sale date</th>
+                        <th data-field="totalsale" data-sortable="true">Total sale</th>
+                        <th data-field="Category" data-sortable="true">Category</th>
+                        <th data-field="tags" data-sortable="false">Tags</th>
+                        <th data-field="actions" class="td-actions text-right" data-events="operateEvents" data-formatter="operateFormatter">Actions</th>
+                    </thead>
+                    <tbody id="table-dataview">
+                        @foreach ($items as $item)
+                            <tr id="tax-{{ $item->id }}" data-id="@if(isset($item->craw_id)){{$item->craw_id}}@endif">
+                                <td></td>
+                                <td class="imageBox">
+                                <div class="selectBox"  data-id="@if(isset($item->craw_id)){{$item->craw_id}}@endif"></div>
+                                <img src="http://placehold.it/80x80"></td>
+                                <td><a href="{{action('ItemsController@edit', [$item->id])}}">{{$item->name}}</a></td>
+                                <td class="sales-single" data-sales="@if(isset($item->getInfo[count($item->getInfo)-1]->sales)){{$item->getInfo[count($item->getInfo)-1]->salesdate}}@endif">
+                                    @if(isset($item->getInfo[count($item->getInfo)-1]->salesdate))
+                                        {{$item->getInfo[count($item->getInfo)-1]->salesdate}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(isset($item->getInfo[count($item->getInfo)-1]->sales))
+                                        {{$item->getInfo[count($item->getInfo)-1]->sales}}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(isset($item->cat_tree))
+                                        {!!$item->cat_tree!!}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(isset($item->tags))
+                                        {{$item->tags}}
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+            </div><!--  end card  -->
+        </div> <!-- end col-md-12 -->
+    </div> <!-- end row -->
+
+</div>
+
+@endsection
+
+@section('extrajs')
+<script type="text/javascript" src="/js/chartist-plugin-tooltip.js"></script>
+<script type="text/javascript" src="/js/detail.board.js"></script>
+@if(isset($dataBoard[0]['item_id']))
+<script type="text/javascript">
+    var data = JSON.parse('{!! $dataBoard[0]['data'] !!}');
+    createChart(data);
+</script>
+@endif
+@endsection

@@ -1,0 +1,380 @@
+@extends('layouts.app')
+
+@section('header')
+<a class="navbar-brand" href="{{action('BoardsController@index')}}">{{trans('taxonomies.list')}}</a>
+@endsection
+
+@section('content')
+    <div class="container-fluid">
+
+        <form id="form-board" action="@if(isset($board)){{action('BoardsController@update',[$board->id])}} @else {{action('BoardsController@create')}} @endif" method="post" class="form-horizontal">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="header">
+                        <h4 class="title">Add new board</h4>
+                        <p class="category">Tab for report chart</p>
+                    </div>
+                    {{ csrf_field() }}
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Board name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="name" value="@if(isset($board)){{$board->name}}@endif">
+                                <input type="hidden" name="user_id" value="{{Auth::user()->id}}">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Description</label>
+                            <div class="col-sm-9">
+                                <textarea  class="form-control" id="description" name="description">@if(isset($board)){{$board->description}}@endif</textarea>
+                                <span class="help-block">Short description for this taxonomy.</span>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                </div>
+            </div><!--End board -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="header">
+                        <h4 class="title">Search</h4>
+                        <p class="category">Search with dropdown or enter on board</p>
+                    </div>
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Thumbs</label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="You thumb url here" name="thumbs" value="@if(isset($board)){{$board->thumb}}@endif" id="upload-image">
+                                    <span class="input-group-addon" id="upload-image">Uploads</span>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">By category</label>
+                            <div class="col-sm-9">
+                                 <select name="cities" class="selectpicker" data-title="Select category" data-style="btn-default btn-block" data-menu-style="dropdown-blue">
+                                        <option value="all">All</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{$category->id}}" @if(isset($taxs) && in_array($category->id, $taxs,TRUE)) selected @endif">{{$category->taxname}}</option>
+                                        @endforeach
+                                    </select>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">By items name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="items-name" name="items-name" value="">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">By author name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="author-name" name="author-name" value="">
+                            </div>
+
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Sale from</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="sale-from" name="sale-from" value="">
+                            </div>
+                            <input type="hidden" id="itemsList" name="items" value="@if(isset($board)){{$board->items}}@endif">
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-9">
+                               <button class="btn btn-default btn-fill btn-wd">@if(isset($board)) Update @else Create @endif</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </form>
+        <div id="result-search">
+            <div id="list-itemsForBoards" class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+
+                            <table id="bootstrap-table" class="table">
+                                <thead>
+                                    <th data-field="state" data-checkbox="true"></th>
+                                    <th data-field="id" class="text-center">ID</th>
+                                    <th data-field="name" data-sortable="true">Name</th>
+                                    <th data-field="author" data-sortable="true">Author</th>
+                                    <th data-field="sales" data-sortable="true">Sales date</th>
+                                    <th data-field="totalsale" data-sortable="true">Total Sales</th>
+                                    <th data-field="lastupdate" data-sortable="true">Last update</th>
+                                    <th data-field="actions" class="td-actions text-right" data-events="operateEvents" data-formatter="operateFormatter">Actions</th>
+                                </thead>
+                                <tbody>
+                                    @foreach ($items as $item)
+
+                                        <tr id="tax-{{ $item->id }}" data-id="{{ $item->tf_id }}">
+                                            <td></td>
+                                            <td>{{$item->id}}</td>
+                                            <td><a href="{{action('ItemsController@edit', [$item->id])}}">{{$item->name}}</a></td>
+                                            <td>{{$item->author}}</td>
+                                            <td>{!!$item->getInfo[count($item->getInfo)-1]->salesdate!!}</td>
+                                            <td>{!!$item->getInfo[count($item->getInfo)-1]->sales!!}</td>
+                                            <td>{!!$item->getInfo[count($item->getInfo)-1]->upload_update!!}</td>
+                                            <td></td>
+                                        </tr>
+
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div><!--  end card  -->
+                    </div> <!-- end col-md-12 -->
+                </div> <!-- end row -->
+            </div>
+        </div><!--End #result-search-->
+@endsection
+
+
+@section('extrajs')
+
+<script>
+
+    $('body').on('click','#bootstrap-table tr', function(){
+        var id          = $(this).attr('data-id');
+        var inputArray  = $('#itemsList').val();
+        var newVal      = 0;
+        if ($(this).hasClass('selected')) {
+            newVal = setinPutValue(inputArray, id);
+        }else{
+            newVal = subInputValue(inputArray, id);
+        }
+        // console.log(newVal)
+        $('#itemsList').val(newVal);
+    });
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a rel="tooltip" title="View" class="btn btn-simple btn-info btn-icon table-action view" href="javascript:void(0)">',
+                '<i class="fa fa-image"></i>',
+            '</a>',
+            '<a rel="tooltip" title="Edit" class="btn btn-simple btn-warning btn-icon table-action edit" href="javascript:void(0)">',
+                '<i class="fa fa-edit"></i>',
+            '</a>'
+        ].join('');
+    }
+
+    /**
+     * get in put value from action
+     * @param  int val current value of input
+     * @param  id click add add to new value
+     * @return string result value
+     */
+    function setinPutValue(val, add){
+        var valInput    = '';
+        var data        = '';
+        if (val == 0)   return add;
+        valInput        = val.split(',');
+        data            = valInput+','+add;
+        return  data;
+    }
+
+
+    /**
+     * Sub value from list data
+     * @param  string val split via comma
+     * @param  int sub value of row want to remove
+     * @return string to input
+     */
+    function subInputValue(val, sub){
+        var dataArray   = '';
+        var data        = "";
+        if (val == sub) return 0;
+        dataArray   = val.toString().split(',');
+        var index   = $.inArray(sub, dataArray);
+        dataArray.splice(index, 1);
+        return dataArray.join();
+    }
+
+
+    $('.selectpicker').change(function(){
+        var idCategory = $(this).val();
+        $('body').addClass('loading');
+        var url        = '/boards/cat/'+idCategory;
+        $.ajax({
+            url: url,
+            dataType:'html',
+        }).done(function(result) {
+            $('body').removeClass('loading');
+            $('#result-search').html(result);
+        });
+    });
+
+    //Enter on input could not submit form
+    $('#items-name, #author-name, #sale-from').keypress(function (e) {
+        if (e.which == 13) {
+            $('body').addClass('loading');
+            return false;
+        }
+    });
+
+
+    // $('#items-name').keyup(function(){
+     $('#items-name').keypress(function(e){
+        if (e.which == 13) {
+            var text = $(this).val();
+            var url        = '/boards/itemname/'+text;
+            $.ajax({
+                url: url,
+                dataType:'html',
+            }).done(function(result) {
+                console.log(result)
+                $('body').removeClass('loading');
+                $('#result-search').html(result);
+
+            });
+        }
+    });
+
+    // $('#sale-from').keyup(function(){
+     $('#sale-from').keypress(function(e){
+        if (e.which == 13) {
+            var text = parseInt($(this).val());
+            var url = '/boards/salefrom/'+text;
+            $.ajax({
+                url: url,
+                dataType:'html',
+            }).done(function(result) {
+                console.log(result)
+                $('body').removeClass('loading');
+                $('#result-search').html(result);
+
+            });
+        }
+    });
+
+    // $('#author-name').keyup(function(){
+    $('#author-name').keypress(function(e){
+        if (e.which == 13) {
+            var text = $(this).val();
+
+            var url        = '/boards/authorname/'+text;
+            $.ajax({
+                url: url,
+                dataType:'html',
+            }).done(function(result) {
+                console.log(result)
+                $('body').removeClass('loading');
+                $('#result-search').html(result);
+
+            });
+        }
+
+    });
+
+    /**
+     * Control tab
+     */
+    $('.nav-tabs a').click(function(){
+        // $('.tab-pane').removeClass('active');
+        if ($(this).attr('href') == '#setting') {
+            // $('#setting').addClass('active').show();
+            $('#list-itemsForBoards').removeClass('hide');
+        }else{
+            $('#list-itemsForBoards').addClass('hide');
+        }
+    });
+
+
+    /*
+     * Setup table list item
+     */
+    var $table = $('#bootstrap-table');
+    $table.bootstrapTable({
+        toolbar: ".toolbar",
+        clickToSelect: true,
+        showRefresh: false,
+        search: false,
+        showToggle: false,
+        showColumns: false,
+        pagination: false,
+    });
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a rel="tooltip" title="View" class="btn btn-simple btn-info btn-icon table-action view" href="javascript:void(0)">',
+                '<i class="fa fa-image"></i>',
+            '</a>',
+            '<a rel="tooltip" title="Edit" class="btn btn-simple btn-warning btn-icon table-action edit" href="javascript:void(0)">',
+                '<i class="fa fa-edit"></i>',
+            '</a>'
+        ].join('');
+    }
+
+    $().ready(function(){
+        window.operateEvents = {
+            'click .view': function (e, value, row, index) {
+                $.ajax({
+                    url: "/items/view/"+row.id,
+                }).done(function(result) {
+                    console.log(result);
+                    swal({  title: 'Theme detail',
+                        html:
+                            '<div class="row"><div class="col-sm-3 text-right">Theme name:</div><div class="col-sm-9 text-left"> <strong><a target="_blank" href="http://themeforest.net/'+result.items.sourceurl+'">' + result.items.name+'</a></strong></div></div>'+
+                            '<div class="row"><div class="col-sm-3 text-right">Author: </div><div class="col-sm-9 text-left"><strong><a target="_blank" href="https://themeforest.net/user/'+result.items.author+'">' + result.items.author+'</a></strong></div></div>'+
+                            '<div class="row"><div class="col-sm-3 text-right">Sales: </div><div class="col-sm-9 text-left"><strong>' + result.itemInfo.salesdate+'</strong></div></div>'+
+                            '<div class="row"><div class="col-sm-3 text-right">Total sales: </div><div class="col-sm-9 text-left"><strong>' + result.itemInfo.sales+'</strong></div></div>'+
+                            '<div class="row"><div class="col-sm-3 text-right">Created at: </div><div class="col-sm-9 text-left"><strong>' + result.items.uploaded+'</strong></div></div>'+
+                            '<div class="row"><div class="col-sm-3 text-right">Last update: </div><div class="col-sm-9 text-left"><strong>' + result.itemInfo.upload_update+'</strong></div></div>'+
+                            '<div class="row"><div class="col-sm-3 text-right">Tags:</div><div class="col-sm-9 text-left " style="word-break:break-all;">' + result.items.tags+'</div></div>'
+                    });
+                });
+
+            },
+            'click .edit': function (e, value, row, index) {
+                window.location = "/items/edit/"+row.id;
+            }
+        }
+    });
+
+
+
+    $(window).resize(function () {
+        $table.bootstrapTable('resetView');
+    });
+
+    //Find item
+    $('#items-find').keyup(function() {
+        if ($(this).val().length > 3) {
+            // swal( "Handler for .keyup() called." );
+            var url = '/search/advance/?q='+$(this).val();
+            $.ajax({
+                url: url,
+                dataType:'html',
+                // data: $(this).val()
+            }).done(function(result) {
+                // console.log(result)
+                $('#result-search').html(result);
+
+            });
+        }
+    });
+    //Get list id from items table
+</script>
+@endsection

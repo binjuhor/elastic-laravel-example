@@ -1,0 +1,56 @@
+@extends('layouts.app')
+
+
+@section('content')
+
+    <div class="panel">
+        <div class="panel-body">
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped" id="table-example">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tax name</th>
+                    <th>Description</th>
+                    <th>Thumbs</th>
+                    <th>Thumbs</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+
+            <tbody align="center">
+                @foreach ($taxonomies as $taxonomy)
+                    <tr class="odd gradeX">
+                        <td>{{ $taxonomy->id }}</td>
+                        <td><a href="{{action('TaxonomyController@edit', [$taxonomy->id])}}">{{ $taxonomy->taxname }}</a></td>
+                        <td>{{ $taxonomy->description }}</td>
+                        <td>{{ $taxonomy->thumbs }}</td>
+                        <td>
+                            @if($taxonomy->parent == '0')
+                                Root
+                            @else
+                                child of {{$taxonomy->parent}}
+                            @endif
+                        </td>
+
+                        <td >
+                            @if ($taxonomy->status == 0)
+                                Available
+
+                            @else
+                                Not available
+
+                            @endif
+                        </td>
+                        <td class="center"><a href="{{action('TaxonomyController@destroy', [$taxonomy->id])}}">Delete</a></td>
+
+                    </tr>
+                @endforeach
+
+            </tbody>
+    </table>
+        </div>
+    </div>
+
+@endsection

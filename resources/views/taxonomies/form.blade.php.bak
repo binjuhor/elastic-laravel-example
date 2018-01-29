@@ -1,0 +1,62 @@
+@extends('layouts.app')
+@section('content')
+
+<div class="panel">
+    <div class="panel-body">
+
+        <form class="col-xs-12" action="@if(isset($taxitem)) {{action('TaxonomyController@update',[$taxitem->id])}} @else {{action('TaxonomyController@create')}} @endif" method="post">
+            {{ csrf_field() }}
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Name </label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="taxname" placeholder="Taxonomy name" value="@if(isset($taxitem)) {{$taxitem->taxname}} @endif" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                    <label class="control-label col-md-2">Parent </label>
+                    <div>
+                      <select multiple="multiple" name="parent[]">
+                            @foreach ($taxonomies as $taxonomy)
+                                <option value="{{ $taxonomy->id }}" @if(isset($taxitem) && in_array($taxonomy->id, explode(',', $taxitem->parent))) selected @endif">{{ $taxonomy->taxname }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Description</label>
+                <div class="col-md-10">
+                    <textarea class="form-control" rows="5" name="description" placeholder="Short description">@if(isset($taxitem)) {{$taxitem->description}} @endif</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Thumbs</label>
+                <div class="col-md-10">
+                    <input type="file" name="thumbs" value="@if(isset($taxitem)) {{$taxitem->thumbs}} @endif">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Availble</label>
+                <div class="col-md-10">
+                    <input type="checkbox" name="status" checked="@if(isset($taxitem)){{$taxitem->status}}@endif">
+                </div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2">&nbsp;</label>
+                <div class="col-md-10">
+                    <button type="submit" class="btn btn-theme">@if(isset($taxitem)) Update @else Create @endif</button>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+</div>
+
+@endsection

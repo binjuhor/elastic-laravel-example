@@ -1,0 +1,54 @@
+@extends('layouts.app')
+
+@section('breadcrumb')
+ <ol class="breadcrumb">
+    <li><a href="{{ url('/') }}">Home</a></li>
+    <li class="active"><a href="{{ action('ItemsController@index') }}">Items</a></li>
+</ol>
+@endsection
+
+@section('content')
+ <div class="col-lg-12 panel">
+
+    <div class="panel-body">
+        <form>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped" id="table-example">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Item name</th>
+                            <th>Description</th>
+                            <th>Sales</th>
+                            <th>Comparetible</th>
+                            <th>File include</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody align="center">
+                        @foreach ($items as $item)
+                            <tr class="odd gradeX">
+                                <td>{{ $item->id }}</td>
+                                <td><a href="{{action('ItemsController@edit', [$item->id])}}">{{ $item->itemname }}</a></td>
+                                <td>{{ $item->description }}</td>
+                                <td>{{ $item->sale }}</td>
+                                <td>
+                                    {{$item->comparetible}}
+                                </td>
+
+                                <td >
+                                   {{$item->fileinclude}}
+                                </td>
+                                <td class="center"><a href="{{action('TaxonomyController@destroy', [$item->id])}}">Delete</a></td>
+
+                            </tr>
+                        @endforeach
+
+                    </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+
+@endsection

@@ -1,0 +1,9 @@
+body{
+    font-family: $La;
+    font-size: $body-size;
+    overflow-x: hidden;
+    // @include font-smoothing;
+    img{
+        max-width: 100%;
+    }
+}

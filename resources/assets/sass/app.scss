@@ -1,0 +1,29 @@
+//Bourbon css3 component http://bourbon.io
+@import "components/bourbon/bourbon";
+
+// Fonts
+// @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,700,300);
+
+// Variables
+@import "variables";
+
+// Bootstrap
+@import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+
+//Css for alert
+@import "components/sweetalert/sweetalert";
+
+//Animated
+@import "components/animate-sass/animate";
+
+//Font icon
+// @import "components/awesome/font-awesome";
+
+//Font icon
+@import "components/awesome/font-awesome";
+
+//Font icon
+@import "section/dashboard";
+
+@import "section/demo";

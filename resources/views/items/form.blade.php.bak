@@ -1,0 +1,111 @@
+@extends('layouts.app')
+@section('content')
+
+<div class="panel">
+    <div class="panel-body">
+
+        <form class="col-xs-12" action="@if(isset($item)) {{action('ItemsController@update',[$item->id])}} @else {{action('ItemsController@create')}} @endif" method="post">
+            {{ csrf_field() }}
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Name </label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="itemname" placeholder="Item name" value="@if(isset($item)) {{$item->itemname}} @endif" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Author</label>
+                <div class="col-md-10">
+                    <select name="authid">
+                        <option value="0">Chose author</option>
+                    @foreach ($userList as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                    @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Description</label>
+                <div class="col-md-10">
+                    <textarea class="form-control" rows="5" name="description" maxlength="225" placeholder="Short description">@if(isset($item)) {{$item->description}} @endif</textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Comment</label>
+                <div class="col-md-10">
+                    <input type="number" class="form-control" name="comments" value="@if(isset($item)) {{$item->comments}} @endif" max="999">
+                </div>
+            </div>
+
+
+             <div class="form-group">
+                <label class="control-label col-md-2">Compare</label>
+                <div class="col-md-10">
+                    <select name="comparetible[]" multiple>
+                        <option value="0" selected >None</option>
+                        <option value="1">Woocommerce</option>
+                        <option value="2">Wordpress</option>
+                        <option value="3">Open cart</option>
+                        <option value="4">Joomla</option>
+                        <option value="4">Others</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Columns</label>
+                <div class="col-md-10">
+                    <select name="comparetible[]" multiple>
+                        <option value="0" selected >0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="4">5</option>
+                    </select>
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Sales</label>
+                <div class="col-md-10">
+                    <input type="number" class="form-control" name="sale" value="@if(isset($item)) {{$item->sale}} @endif" max="999">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Rating</label>
+                <div class="col-md-10">
+                    <input type="number" class="form-control" name="rating" max="999" value="@if(isset($item)) {{$item->rating}} @endif">
+                </div>
+            </div>
+
+
+
+
+            <div class="form-group">
+                <label class="control-label col-md-2">Cover</label>
+                <div class="col-md-10">
+                    <input type="file" name="cover" value="@if(isset($item)) {{$item->cover}} @endif">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2">&nbsp;</label>
+                <div class="col-md-10">
+                    <button type="submit" class="btn btn-theme">@if(isset($item)) Update @else Create @endif</button>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+</div>
+
+@endsection
